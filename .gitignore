@@ -1,0 +1,13 @@
+# Kuku's episodes are confidential: never publish them
+episodes/*
+!episodes/README.md
+.env
+.cache/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+# outputs are fine to share as the "raw outputs" folder, but they quote the
+# script, so keep the repo private or upload outputs to Drive instead
+outputs/
+venv/
+.venv/

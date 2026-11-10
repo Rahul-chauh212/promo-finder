@@ -1,0 +1,80 @@
+# ------------------------------------------------------------------
+# Promo Finder settings. Change things here, not in the code.
+# ------------------------------------------------------------------
+
+# Which AI to use. One of the names under "providers" below.
+# "mock" = practice mode, no AI, no key needed.
+provider: gemini
+
+providers:
+  gemini:       # free tier from https://aistudio.google.com (no card)
+    type: openai
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    model: gemini-3.6-flash   # Google retires old names often; if you get a 404, use the name in the error
+    key_env: GEMINI_API_KEY
+    extra:                    # sent as-is to the AI; makes "thinking" models answer faster
+      reasoning_effort: low   # if you get a 400 error mentioning this, delete these two lines
+  groq:         # free tier from https://console.groq.com
+    type: openai
+    base_url: https://api.groq.com/openai/v1
+    model: openai/gpt-oss-120b
+    key_env: GROQ_API_KEY
+    extra:
+      reasoning_effort: low
+  openrouter:   # many models behind one key, some free
+    type: openai
+    base_url: https://openrouter.ai/api/v1
+    model: meta-llama/llama-3.3-70b-instruct:free
+    key_env: OPENROUTER_API_KEY
+  openai:
+    type: openai
+    base_url: https://api.openai.com/v1
+    model: gpt-4o-mini
+    key_env: OPENAI_API_KEY
+  anthropic:
+    type: anthropic
+    model: claude-sonnet-5-5
+    key_env: ANTHROPIC_API_KEY
+  ollama:       # runs on your own laptop, free, no key
+    type: openai
+    base_url: http://localhost:11434/v1
+    model: llama3.1
+    key_env: ""
+    json_mode: false
+  mock:
+    type: mock
+
+ai:
+  temperature: 0.2
+  seconds_between_calls: 6     # free tiers allow only a few requests per minute
+  timeout_seconds: 420         # thinking models can take several minutes on big requests
+  max_output_tokens: 8000
+
+# How many episodes / promos go into ONE AI request.
+# Bigger batches = fewer requests (good for free daily limits).
+batching:
+  episodes_per_call: 5      # 50 episodes -> 10 requests
+  promos_per_stranger_call: 10 # 30 promos -> 3 requests
+  include_camera_lines: false  # true = AI also reads shot notes (more tokens)
+
+promo_rules:
+  min_seconds: 20
+  max_seconds: 60
+  ideal_min: 25                # sweet spot for short-form ads
+  ideal_max: 45
+  hook_within_seconds: 3       # the hook must land in the first 3 seconds
+  hooks_per_episode: 5
+  cliffhangers_per_episode: 5
+  max_overlap: 0.5             # two promos sharing >50% of footage = duplicate
+  max_per_episode_in_top: 2    # variety in the final list
+  candidates_to_test: 30       # best N go through the "stranger test"
+  stitched_promos: 6           # multi-moment promos the AI may propose
+  allow_cross_episode: true    # end of ep N + start of ep N+1 as one promo
+
+# How the final score is made (adds up to 1.0)
+weights:
+  hook: 0.30                   # AI hook strength + stranger "would I stop?"
+  cliffhanger: 0.25            # AI cliffhanger strength + stranger "need to know next"
+  stands_alone: 0.25           # stranger "does it make sense on its own?"
+  emotion_check: 0.12          # script tags/words agree it is heated
+  length_fit: 0.08             # 25-45 s is best
